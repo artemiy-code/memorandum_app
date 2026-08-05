@@ -53,19 +53,4 @@ class NotesRepositoryImpl @Inject constructor(
     override suspend fun switchPinnedStatus(noteId: Int) {
         dao.switchPinnedStatus(noteId)
     }
-
-//    companion object {
-//        private var INSTANCE: NotesRepositoryImpl? = null
-//        private val lock = Any()
-//
-//        fun getInstance(db: AppDatabase): NotesRepositoryImpl {
-//            INSTANCE?.also { return it }
-//            synchronized(lock) {
-//                INSTANCE?.also { return it }
-//                return NotesRepositoryImpl(db).also {
-//                    INSTANCE = it
-//                }
-//            }
-//        }
-//    }
 }

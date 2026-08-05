@@ -1,6 +1,7 @@
 package ru.artem_torpedo.memorandum.di
 
 import android.content.Context
+import androidx.room.Room
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -27,12 +28,16 @@ interface Module {
         @Singleton
         @Provides
         fun getDatabaseMainClass(@ApplicationContext context: Context): AppDatabase {
-            return AppDatabase.getInstance(context)
+            return Room.databaseBuilder(
+                context = context,
+                klass = AppDatabase::class.java,
+                name = "note.db"
+            ).build()
         }
 
         @Singleton
         @Provides
-        fun getDao (db : AppDatabase): NotesDao {
+        fun getDao(db: AppDatabase): NotesDao {
             return db.notesDao()
         }
     }

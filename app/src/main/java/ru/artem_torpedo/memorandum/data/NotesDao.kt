@@ -25,7 +25,7 @@ interface NotesDao {
     @Query("UPDATE notes SET isPinned = NOT isPinned WHERE id == :noteId ")
     suspend fun switchPinnedStatus(noteId: Int)
 
-    //@Insert(onConflict = OnConflictStrategy.REPLACE)
+    //@Insert(onConflict = OnConflictStrategy.REPLACE) - более плохая альтернтива
     @Upsert
     suspend fun addOrEditNote(note: NoteDbModel)
 }

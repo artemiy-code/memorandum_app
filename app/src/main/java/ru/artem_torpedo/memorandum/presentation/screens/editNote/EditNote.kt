@@ -38,12 +38,7 @@ import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 @Composable
 fun EditNote(
     modifier: Modifier = Modifier,
-    noteId: Int,
-    editNoteViewModel: EditNoteViewModel = hiltViewModel(
-        creationCallback = { factory: EditNoteViewModel.Factory ->
-            factory.create(noteId)
-        }
-    ),
+    editNoteViewModel: EditNoteViewModel,
     onFinished: () -> Unit,
 ) {
     when (val stateValue = editNoteViewModel.state.collectAsState().value) {

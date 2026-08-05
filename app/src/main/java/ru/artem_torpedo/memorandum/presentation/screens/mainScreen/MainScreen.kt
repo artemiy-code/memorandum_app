@@ -42,7 +42,7 @@ import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel = hiltViewModel(),
+    viewModel: MainViewModel,
     onClick: (Note) -> Unit,
     onFABClick: () -> Unit,
 ) {
