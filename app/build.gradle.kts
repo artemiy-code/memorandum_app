@@ -67,5 +67,3 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
-
-//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
