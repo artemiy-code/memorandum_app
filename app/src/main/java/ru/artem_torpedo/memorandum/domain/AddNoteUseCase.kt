@@ -1,6 +1,8 @@
 package ru.artem_torpedo.memorandum.domain
 
-class AddNoteUseCase(
+import javax.inject.Inject
+
+class AddNoteUseCase @Inject constructor(
     private val repository: NotesRepository,
 ) {
     suspend operator fun invoke(title: String, description: String) {

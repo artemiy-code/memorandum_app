@@ -1,24 +1,27 @@
 package ru.artem_torpedo.memorandum.presentation.screens.editNote
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.artem_torpedo.memorandum.data.NotesRepositoryImpl
 import ru.artem_torpedo.memorandum.domain.DeleteNoteUseCase
 import ru.artem_torpedo.memorandum.domain.EditNoteUseCase
 import ru.artem_torpedo.memorandum.domain.GetNoteUseCase
 import ru.artem_torpedo.memorandum.domain.Note
 
-class EditNoteViewModel(private val noteId: Int, context: Context) : ViewModel() {
-    private val repository = NotesRepositoryImpl.getInstance(context)
-
-    val editNoteUseCase = EditNoteUseCase(repository)
-    val deleteNoteUseCase = DeleteNoteUseCase(repository)
-    val getNoteUseCase = GetNoteUseCase(repository)
+@HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
+class EditNoteViewModel @AssistedInject constructor(
+    private val editNoteUseCase : EditNoteUseCase,
+    private val deleteNoteUseCase : DeleteNoteUseCase,
+    private val getNoteUseCase : GetNoteUseCase,
+    @Assisted("noteId") private val noteId: Int,
+) : ViewModel() {
 
     private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Initial)
     val state = _state.asStateFlow()
@@ -30,6 +33,13 @@ class EditNoteViewModel(private val noteId: Int, context: Context) : ViewModel()
                 EditNoteState.Edit(note)
             }
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted("noteId") noteId: Int,
+        ): EditNoteViewModel
     }
 
     fun processCommand(command: Command) {

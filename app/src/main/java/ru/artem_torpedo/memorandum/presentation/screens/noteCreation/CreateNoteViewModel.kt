@@ -1,20 +1,19 @@
 package ru.artem_torpedo.memorandum.presentation.screens.noteCreation
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.artem_torpedo.memorandum.data.NotesRepositoryImpl
-import ru.artem_torpedo.memorandum.data.TestNotesRepositoryImpl
 import ru.artem_torpedo.memorandum.domain.AddNoteUseCase
+import javax.inject.Inject
 
-class CreateNoteViewModel(context: Context) : ViewModel() {
-    private val repository = NotesRepositoryImpl.getInstance(context)
-
-    val addNoteUseCase = AddNoteUseCase(repository)
+@HiltViewModel
+class CreateNoteViewModel @Inject constructor(
+    private val addNoteUseCase : AddNoteUseCase
+) : ViewModel() {
 
     private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Creation())
     val state = _state.asStateFlow()

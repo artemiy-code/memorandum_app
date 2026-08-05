@@ -1,14 +1,16 @@
 package ru.artem_torpedo.memorandum.data
 
-import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import ru.artem_torpedo.memorandum.domain.Note
 import ru.artem_torpedo.memorandum.domain.NotesRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class NotesRepositoryImpl private constructor(context: Context) : NotesRepository {
-    private val db = AppDatabase.getInstance(context)
-    private val dao = db.notesDao()
+@Singleton
+class NotesRepositoryImpl @Inject constructor(
+    private val dao: NotesDao,
+) : NotesRepository {
 
     override suspend fun addNote(
         title: String,
@@ -52,18 +54,18 @@ class NotesRepositoryImpl private constructor(context: Context) : NotesRepositor
         dao.switchPinnedStatus(noteId)
     }
 
-    companion object {
-        private var INSTANCE: NotesRepositoryImpl? = null
-        private val lock = Any()
-
-        fun getInstance(context: Context): NotesRepositoryImpl {
-            INSTANCE?.also { return it }
-            synchronized(lock) {
-                INSTANCE?.also { return it }
-                return NotesRepositoryImpl(context).also {
-                    INSTANCE = it
-                }
-            }
-        }
-    }
+//    companion object {
+//        private var INSTANCE: NotesRepositoryImpl? = null
+//        private val lock = Any()
+//
+//        fun getInstance(db: AppDatabase): NotesRepositoryImpl {
+//            INSTANCE?.also { return it }
+//            synchronized(lock) {
+//                INSTANCE?.also { return it }
+//                return NotesRepositoryImpl(db).also {
+//                    INSTANCE = it
+//                }
+//            }
+//        }
+//    }
 }

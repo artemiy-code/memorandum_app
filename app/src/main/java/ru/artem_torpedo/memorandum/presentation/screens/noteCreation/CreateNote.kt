@@ -1,6 +1,5 @@
 package ru.artem_torpedo.memorandum.presentation.screens.noteCreation
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,12 +24,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ru.artem_torpedo.memorandum.R
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 
@@ -38,10 +36,7 @@ import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 @Composable
 fun CreateNote(
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current.applicationContext,
-    createNoteViewModel: CreateNoteViewModel = viewModel {
-        CreateNoteViewModel(context)
-    },
+    createNoteViewModel: CreateNoteViewModel = hiltViewModel(),
     onFinished: () -> Unit,
 ) {
     when (val stateValue = createNoteViewModel.state.collectAsState().value) {

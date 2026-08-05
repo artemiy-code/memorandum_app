@@ -2,9 +2,9 @@
 
 package ru.artem_torpedo.memorandum.presentation.screens.mainScreen
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,18 +13,18 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.artem_torpedo.memorandum.data.NotesRepositoryImpl
 import ru.artem_torpedo.memorandum.domain.GetAllNotesUseCase
 import ru.artem_torpedo.memorandum.domain.Note
 import ru.artem_torpedo.memorandum.domain.SearchNoteUseCase
 import ru.artem_torpedo.memorandum.domain.SwitchPinnedStatusUseCase
+import javax.inject.Inject
 
-class MainViewModel(context: Context) : ViewModel() {
-
-    private val repository = NotesRepositoryImpl.getInstance(context)
-    val getAllNotesUseCase = GetAllNotesUseCase(repository)
-    val searchNoteUseCase = SearchNoteUseCase(repository)
-    val switchPinnedStatusUseCase = SwitchPinnedStatusUseCase(repository)
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val getAllNotesUseCase : GetAllNotesUseCase,
+    private val searchNoteUseCase : SearchNoteUseCase,
+    private val switchPinnedStatusUseCase : SwitchPinnedStatusUseCase,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
     val state = _state.asStateFlow()

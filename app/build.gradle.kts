@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "ru.artem_torpedo.memorandum"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "ru.artem_torpedo.memorandum"
@@ -49,7 +49,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-
+    implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -67,3 +67,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
+//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
