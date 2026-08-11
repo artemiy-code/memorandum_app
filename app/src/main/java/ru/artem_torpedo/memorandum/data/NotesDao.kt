@@ -16,7 +16,7 @@ interface NotesDao {
     @Query("SELECT * FROM notes WHERE id == :noteId")
     suspend fun getNote(noteId : Int): NoteDbModel
 
-    @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%' ORDER BY updatedAt DESC")
     fun filterNotes(query: String): Flow<List<NoteDbModel>>
 
     @Query("DELETE FROM notes WHERE id == :noteId ")
@@ -25,7 +25,7 @@ interface NotesDao {
     @Query("UPDATE notes SET isPinned = NOT isPinned WHERE id == :noteId ")
     suspend fun switchPinnedStatus(noteId: Int)
 
-    //@Insert(onConflict = OnConflictStrategy.REPLACE) - более плохая альтернтива
+    //@Insert(onConflict = OnConflictStrategy.REPLACE) - более плохая альтернатива
     @Upsert
     suspend fun addOrEditNote(note: NoteDbModel)
 }

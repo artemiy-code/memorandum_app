@@ -30,8 +30,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ru.artem_torpedo.memorandum.R
+import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +96,7 @@ fun EditNote(
                 ) {
                     Spacer(Modifier.height(16.dp))
 
+                    // Заголовок заметки
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -116,38 +117,27 @@ fun EditNote(
                     )
 
                     Spacer(Modifier.height(12.dp))
+
+                    // Дата последнего изменения заметки
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         text = DateConverter.convertDate(stateValue.note.updatedAt),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
                     Spacer(Modifier.height(12.dp))
 
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        value = stateValue.note.description,
-                        onValueChange = {
-                            editNoteViewModel.processCommand(Command.ChangeDescription(it))
-                        },
-                        placeholder = {
-                            Text(
-                                text = "Description",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.bodyLarge,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        minLines = 5
-                    )
+                    // Контент заметки
+                    stateValue.note.content.filterIsInstance<IContent.Text>().forEach {
+                        NoteContent(
+                            modifier = Modifier.weight(1f),
+                            text = it.text,
+                            onTextInput = { newText ->
+                                editNoteViewModel.processCommand(Command.ChangeContent(newText))
+                            }
+                        )
+                    }
 
                     Spacer(Modifier.height(16.dp))
 
@@ -185,4 +175,32 @@ fun EditNote(
             }
         }
     }
+}
+
+@Composable
+private fun NoteContent(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextInput: (String) -> Unit,
+) {
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        value = text,
+        onValueChange = onTextInput,
+        placeholder = {
+            Text(
+                text = "Content",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        textStyle = MaterialTheme.typography.bodyLarge,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+        ),
+        minLines = 5
+    )
 }

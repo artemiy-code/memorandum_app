@@ -2,6 +2,7 @@ package ru.artem_torpedo.memorandum.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.domain.Note
 import ru.artem_torpedo.memorandum.domain.NotesRepository
 import javax.inject.Inject
@@ -14,11 +15,11 @@ class NotesRepositoryImpl @Inject constructor(
 
     override suspend fun addNote(
         title: String,
-        description: String,
+        content: List<IContent>,
         updatedAt: Long,
         isPinned: Boolean,
     ) {
-        val note = NoteDbModel(0, title, description, updatedAt, isPinned)
+        val note = Note(0, title, content, updatedAt, isPinned).convertToDB()
         dao.addOrEditNote(note)
     }
 
