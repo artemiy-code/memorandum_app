@@ -8,11 +8,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.artem_torpedo.memorandum.domain.AddNoteUseCase
+import ru.artem_torpedo.memorandum.domain.IContent
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateNoteViewModel @Inject constructor(
-    private val addNoteUseCase : AddNoteUseCase
+    private val addNoteUseCase: AddNoteUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<EditNoteState>(EditNoteState.Creation())
@@ -23,13 +24,13 @@ class CreateNoteViewModel @Inject constructor(
             is Command.AddTitle -> _state.update {
                 (it as EditNoteState.Creation).copy(
                     title = command.title,
-                    isActive = command.title.isNotBlank() && it.description.isNotBlank()
+                    isActive = command.title.isNotBlank() && it.content.isNotBlank()
                 )
             }
 
             is Command.AddDescription -> _state.update {
                 (it as EditNoteState.Creation).copy(
-                    description = command.description,
+                    content = command.description,
                     isActive = command.description.isNotBlank() && it.title.isNotBlank()
                 )
             }
@@ -40,8 +41,9 @@ class CreateNoteViewModel @Inject constructor(
 
             is Command.Save -> {
                 val note = _state.value as EditNoteState.Creation
+                val newContent = listOf(IContent.Text(note.content))
                 viewModelScope.launch {
-                    addNoteUseCase(note.title, note.description)
+                    addNoteUseCase(note.title, newContent)
                     _state.update {
                         EditNoteState.Finished
                     }
@@ -61,7 +63,7 @@ sealed interface Command {
 sealed interface EditNoteState {
     data class Creation(
         val title: String = "",
-        val description: String = "",
+        val content: String = "",
         val isActive: Boolean = false,
     ) : EditNoteState
 

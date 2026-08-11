@@ -28,7 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ru.artem_torpedo.memorandum.R
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 
@@ -114,7 +113,7 @@ fun CreateNote(
                             .fillMaxWidth()
                             .weight(1f),
                         shape = RoundedCornerShape(16.dp),
-                        value = stateValue.description,
+                        value = stateValue.content,
                         onValueChange = {
                             createNoteViewModel.processCommand(Command.AddDescription(it))
                         },

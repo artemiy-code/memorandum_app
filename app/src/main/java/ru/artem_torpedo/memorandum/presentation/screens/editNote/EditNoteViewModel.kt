@@ -13,13 +13,14 @@ import kotlinx.coroutines.launch
 import ru.artem_torpedo.memorandum.domain.DeleteNoteUseCase
 import ru.artem_torpedo.memorandum.domain.EditNoteUseCase
 import ru.artem_torpedo.memorandum.domain.GetNoteUseCase
+import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.domain.Note
 
 @HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
 class EditNoteViewModel @AssistedInject constructor(
-    private val editNoteUseCase : EditNoteUseCase,
-    private val deleteNoteUseCase : DeleteNoteUseCase,
-    private val getNoteUseCase : GetNoteUseCase,
+    private val editNoteUseCase: EditNoteUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val getNoteUseCase: GetNoteUseCase,
     @Assisted("noteId") private val noteId: Int,
 ) : ViewModel() {
 
@@ -50,9 +51,10 @@ class EditNoteViewModel @AssistedInject constructor(
                 previousState.copy(note = newNote)
             }
 
-            is Command.ChangeDescription -> _state.update {
+            is Command.ChangeContent -> _state.update {
                 val previousState = it as EditNoteState.Edit
-                val newNote = previousState.note.copy(description = command.description)
+                val newContent = listOf(IContent.Text(command.content))
+                val newNote = previousState.note.copy(content = newContent)
                 previousState.copy(note = newNote)
             }
 
@@ -85,9 +87,13 @@ class EditNoteViewModel @AssistedInject constructor(
 
 sealed interface Command {
     data class ChangeTitle(val title: String) : Command
-    data class ChangeDescription(val description: String) : Command
+
+    data class ChangeContent(val content: String) : Command
+
     object Save : Command
+
     object Back : Command
+
     object Delete : Command
 }
 
@@ -97,8 +103,17 @@ sealed interface EditNoteState {
     data class Edit(
         val note: Note,
     ) : EditNoteState {
-        val isEnabled
-            get() = note.title.isNotBlank() && note.description.isNotBlank()
+        val isEnabled: Boolean
+            get() {
+                return when {
+                    note.title.isBlank() -> false
+                    note.content.isEmpty() -> false
+                    note.content.any {
+                        it is IContent.Image || (it as IContent.Text).text.isNotBlank()
+                    } -> true
+                    else -> false
+                }
+            }
     }
 
     data object Finished : EditNoteState

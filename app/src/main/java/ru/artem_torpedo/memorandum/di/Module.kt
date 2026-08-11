@@ -32,7 +32,7 @@ interface Module {
                 context = context,
                 klass = AppDatabase::class.java,
                 name = "note.db"
-            ).build()
+            ).fallbackToDestructiveMigration(dropAllTables = true).build()
         }
 
         @Singleton

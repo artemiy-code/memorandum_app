@@ -32,8 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import ru.artem_torpedo.memorandum.R
+import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.domain.Note
 import ru.artem_torpedo.memorandum.presentation.ui.theme.ElectricBlue
 import ru.artem_torpedo.memorandum.presentation.ui.theme.OtherNotesColors
@@ -96,6 +96,7 @@ fun MainScreen(
                     )
                 }
 
+                // Закрепленные заметки
                 item {
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -134,6 +135,7 @@ fun MainScreen(
                     )
                 }
 
+                // Не закрепленные заметки
                 stateValue.unPinnedNotes.forEachIndexed { index, note ->
                     item(key = note.id) {
                         NoteCard(
@@ -245,14 +247,20 @@ fun NoteCard(
             overflow = TextOverflow.Ellipsis
         )
 
-        Text(
-            text = note.description,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis
-        )
+        note.content.filterIsInstance<IContent.Text>()
+            .joinToString("\n") {
+                it.text
+            }.also {
+                Text(
+                    text = it,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
 
         Text(
             modifier = Modifier.align(Alignment.End),
