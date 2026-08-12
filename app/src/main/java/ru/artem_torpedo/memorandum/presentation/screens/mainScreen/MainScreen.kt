@@ -75,7 +75,7 @@ fun MainScreen(
             item {
                 Title(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "All Notes"
+                    text = "All Notes",
                 )
             }
 
@@ -193,7 +193,7 @@ fun SearchBar(
             Icon(
                 painter = painterResource(R.drawable.ic_search),
                 contentDescription = "Search",
-                tint = ElectricBlue
+                tint = MaterialTheme.colorScheme.primary
             )
         },
         colors = TextFieldDefaults.colors(

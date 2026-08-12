@@ -1,5 +1,8 @@
 package ru.artem_torpedo.memorandum.presentation.screens.noteCreation
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +41,13 @@ fun CreateNote(
     createNoteViewModel: CreateNoteViewModel,
     onFinished: () -> Unit,
 ) {
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {
+            Log.d("CreateNote", it.toString())
+        }
+    )
+
     when (val stateValue = createNoteViewModel.state.collectAsState().value) {
         is EditNoteState.Creation -> {
             Scaffold(
@@ -64,6 +74,19 @@ fun CreateNote(
                                 painter = painterResource(R.drawable.ic_angle_double_left),
                                 contentDescription = "Go back",
                                 tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        actions = {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 16.dp)
+                                    .size(24.dp)
+                                    .clickable{
+                                        imagePicker.launch("image/*")
+                                    },
+                                painter = painterResource(R.drawable.ic_add_note),
+                                contentDescription = "Add photo from gallery",
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
