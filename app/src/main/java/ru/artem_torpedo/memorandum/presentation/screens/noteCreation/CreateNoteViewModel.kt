@@ -1,5 +1,6 @@
 package ru.artem_torpedo.memorandum.presentation.screens.noteCreation
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,17 +23,46 @@ class CreateNoteViewModel @Inject constructor(
     fun processCommand(command: Command) {
         when (command) {
             is Command.AddTitle -> _state.update {
-                (it as EditNoteState.Creation).copy(
-                    title = command.title,
-                    isActive = command.title.isNotBlank() && it.content.isNotBlank()
-                )
+                if (it is EditNoteState.Creation) {
+                    it.copy(title = command.title)
+                } else it
             }
 
             is Command.AddDescription -> _state.update {
-                (it as EditNoteState.Creation).copy(
-                    content = command.description,
-                    isActive = command.description.isNotBlank() && it.title.isNotBlank()
-                )
+                if (it is EditNoteState.Creation) {
+                    val newContent = it.content
+                        .mapIndexed { index, content ->
+                            if (index == command.index && content is IContent.Text) {
+                                content.copy(text = command.description)
+                            } else {
+                                content
+                            }
+                        }
+                    it.copy(content = newContent)
+                } else {
+                    it
+                }
+            }
+
+            is Command.AddImage -> {
+                _state.update {
+                    if (it is EditNoteState.Creation) {
+
+                        val newContent = it.content.toMutableList()
+                            .dropLastWhile { last ->
+                                last is IContent.Text && last.text.isBlank()
+                            }.toMutableList()
+                            .apply {
+                                add(IContent.Image(url = command.uri.toString()))
+                                add(IContent.Text(text = ""))
+                            }
+
+                        it.copy(content = newContent)
+                    } else {
+                        it
+                    }
+                }
+
             }
 
             is Command.Back -> _state.update {
@@ -40,12 +70,18 @@ class CreateNoteViewModel @Inject constructor(
             }
 
             is Command.Save -> {
-                val note = _state.value as EditNoteState.Creation
-                val newContent = listOf(IContent.Text(note.content))
-                viewModelScope.launch {
-                    addNoteUseCase(note.title, newContent)
-                    _state.update {
+                _state.update { state ->
+                    if (state is EditNoteState.Creation) {
+                        val title = state.title
+                        val content = state.content.filter {
+                            it is IContent.Image || (it as IContent.Text).text.isNotBlank()
+                        }
+                        viewModelScope.launch {
+                            addNoteUseCase(title, content)
+                        }
                         EditNoteState.Finished
+                    } else {
+                        state
                     }
                 }
             }
@@ -55,7 +91,8 @@ class CreateNoteViewModel @Inject constructor(
 
 sealed interface Command {
     data class AddTitle(val title: String) : Command
-    data class AddDescription(val description: String) : Command
+    data class AddDescription(val description: String, val index: Int) : Command
+    data class AddImage(val uri: Uri) : Command
     object Save : Command
     object Back : Command
 }
@@ -63,9 +100,20 @@ sealed interface Command {
 sealed interface EditNoteState {
     data class Creation(
         val title: String = "",
-        val content: String = "",
-        val isActive: Boolean = false,
-    ) : EditNoteState
+        val content: List<IContent> = listOf(IContent.Text("")),
+    ) : EditNoteState {
+
+        val isActive: Boolean
+            get() {
+                if (title.isBlank() || content.isEmpty()) {
+                    return false
+                }
+                return content.any {
+                    it is IContent.Image || (it as IContent.Text).text.isNotBlank()
+                }
+            }
+
+    }
 
     data object Finished : EditNoteState
 }

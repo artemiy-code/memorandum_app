@@ -246,7 +246,6 @@ fun NoteCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-
         note.content.filterIsInstance<IContent.Text>()
             .joinToString("\n") {
                 it.text

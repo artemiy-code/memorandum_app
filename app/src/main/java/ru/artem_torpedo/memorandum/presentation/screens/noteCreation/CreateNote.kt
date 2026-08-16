@@ -1,9 +1,9 @@
 package ru.artem_torpedo.memorandum.presentation.screens.noteCreation
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.artem_torpedo.memorandum.R
+import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,8 +45,10 @@ fun CreateNote(
 ) {
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
-        onResult = {
-            Log.d("CreateNote", it.toString())
+        onResult = { uri ->
+            uri?.also {
+                createNoteViewModel.processCommand(Command.AddImage(it))
+            }
         }
     )
 
@@ -81,10 +85,10 @@ fun CreateNote(
                                 modifier = Modifier
                                     .padding(end = 16.dp)
                                     .size(24.dp)
-                                    .clickable{
+                                    .clickable {
                                         imagePicker.launch("image/*")
                                     },
-                                painter = painterResource(R.drawable.ic_add_note),
+                                painter = painterResource(R.drawable.ic_add_photo),
                                 contentDescription = "Add photo from gallery",
                                 tint = MaterialTheme.colorScheme.secondary
                             )
@@ -103,6 +107,7 @@ fun CreateNote(
                 ) {
                     Spacer(Modifier.height(16.dp))
 
+                    // Field for title
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -111,7 +116,10 @@ fun CreateNote(
                             createNoteViewModel.processCommand(Command.AddTitle(it))
                         },
                         placeholder = {
-                            Text(text = "Title", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                text = "Title",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         },
                         textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -123,41 +131,58 @@ fun CreateNote(
                     )
 
                     Spacer(Modifier.height(12.dp))
+
+                    // Field for date
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         text = DateConverter.currentDate(),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
                     Spacer(Modifier.height(12.dp))
 
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        value = stateValue.content,
-                        onValueChange = {
-                            createNoteViewModel.processCommand(Command.AddDescription(it))
-                        },
-                        placeholder = {
-                            Text(
-                                text = "Description",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.bodyLarge,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        minLines = 5
-                    )
+                    // Field for content
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        stateValue.content.forEachIndexed { index, content ->
+                            when (content) {
+                                is IContent.Image -> {
+                                    item {
+                                        FieldForContent(
+                                            modifier = Modifier,
+                                            text = content.url,
+                                            onTextInput = {},
+                                            readOnly = true
+                                        )
+                                    }
+                                }
+
+                                is IContent.Text -> {
+                                    item {
+                                        FieldForContent(
+                                            modifier = Modifier,
+                                            text = content.text,
+                                            onTextInput = {
+                                                createNoteViewModel.processCommand(
+                                                    Command.AddDescription(
+                                                        description = it,
+                                                        index = index
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     Spacer(Modifier.height(16.dp))
 
+                    // Save button
                     Button(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -174,6 +199,7 @@ fun CreateNote(
                     ) {
                         Text(text = "Save", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
+
                     Spacer(Modifier.height(16.dp))
                 }
             }
@@ -185,4 +211,38 @@ fun CreateNote(
             }
         }
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@Composable
+fun FieldForContent(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextInput: (String) -> Unit,
+    readOnly: Boolean = false,
+) {
+    OutlinedTextField(
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        value = text,
+        onValueChange = onTextInput,
+        readOnly = readOnly,
+        placeholder = {
+            Text(
+                text = "Description",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Light
+            )
+        },
+        textStyle = MaterialTheme.typography.bodyLarge,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+        ),
+        minLines = 5
+    )
 }

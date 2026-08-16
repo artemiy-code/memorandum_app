@@ -106,8 +106,7 @@ sealed interface EditNoteState {
         val isEnabled: Boolean
             get() {
                 return when {
-                    note.title.isBlank() -> false
-                    note.content.isEmpty() -> false
+                    note.title.isBlank() || note.content.isEmpty() -> false
                     note.content.any {
                         it is IContent.Image || (it as IContent.Text).text.isNotBlank()
                     } -> true
