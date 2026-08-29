@@ -47,7 +47,6 @@ class CreateNoteViewModel @Inject constructor(
             is Command.AddImage -> {
                 _state.update {
                     if (it is EditNoteState.Creation) {
-
                         val newContent = it.content.toMutableList()
                             .dropLastWhile { last ->
                                 last is IContent.Text && last.text.isBlank()
@@ -65,6 +64,24 @@ class CreateNoteViewModel @Inject constructor(
 
             }
 
+            is Command.DeleteImage -> {
+                _state.update {
+                    if (it is EditNoteState.Creation) {
+                        val newContent = it.content.toMutableList()
+                            .apply {
+                                removeAt(command.index)
+                            }
+                        val last = newContent.last()
+                        if (last is IContent.Text && last.text.isBlank() && newContent.size > 1 && newContent[newContent.lastIndex - 1] is IContent.Text) {
+                            newContent.removeAt(newContent.lastIndex)
+                        }
+                        it.copy(content = newContent)
+                    } else {
+                        it
+                    }
+                }
+            }
+
             is Command.Back -> _state.update {
                 EditNoteState.Finished
             }
@@ -73,8 +90,8 @@ class CreateNoteViewModel @Inject constructor(
                 _state.update { state ->
                     if (state is EditNoteState.Creation) {
                         val title = state.title
-                        val content = state.content.filter {
-                            it is IContent.Image || (it as IContent.Text).text.isNotBlank()
+                        val content = state.content.filterIndexed { index, content ->
+                            content is IContent.Image || (content as IContent.Text).text.isNotBlank() || index == state.content.size - 1
                         }
                         viewModelScope.launch {
                             addNoteUseCase(title, content)
@@ -93,6 +110,7 @@ sealed interface Command {
     data class AddTitle(val title: String) : Command
     data class AddDescription(val description: String, val index: Int) : Command
     data class AddImage(val uri: Uri) : Command
+    data class DeleteImage(val index: Int) : Command
     object Save : Command
     object Back : Command
 }

@@ -4,7 +4,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,11 +29,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import ru.artem_torpedo.memorandum.R
 import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
@@ -43,6 +49,7 @@ fun CreateNote(
     createNoteViewModel: CreateNoteViewModel,
     onFinished: () -> Unit,
 ) {
+
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
@@ -57,52 +64,16 @@ fun CreateNote(
             Scaffold(
                 modifier = modifier,
                 topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                modifier = Modifier.padding(start = 12.dp),
-                                text = "Create note",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        navigationIcon = {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(start = 16.dp)
-                                    .size(24.dp)
-                                    .clickable {
-                                        createNoteViewModel.processCommand(Command.Back)
-                                    },
-                                painter = painterResource(R.drawable.ic_angle_double_left),
-                                contentDescription = "Go back",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        actions = {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 16.dp)
-                                    .size(24.dp)
-                                    .clickable {
-                                        imagePicker.launch("image/*")
-                                    },
-                                painter = painterResource(R.drawable.ic_add_photo),
-                                contentDescription = "Add photo from gallery",
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background
-                        )
+                    TopBar(
+                        onNavIconClick = { createNoteViewModel.processCommand(Command.Back) },
+                        onActionIconClick = { imagePicker.launch("image/*") }
                     )
                 }
             ) { innerPadding ->
                 Column(
                     modifier = modifier
                         .padding(innerPadding)
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 8.dp)
                         .fillMaxSize()
                 ) {
                     Spacer(Modifier.height(16.dp))
@@ -143,44 +114,25 @@ fun CreateNote(
                     Spacer(Modifier.height(12.dp))
 
                     // Field for content
-                    LazyColumn(
+                    Content(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        stateValue.content.forEachIndexed { index, content ->
-                            when (content) {
-                                is IContent.Image -> {
-                                    item {
-                                        FieldForContent(
-                                            modifier = Modifier,
-                                            text = content.url,
-                                            onTextInput = {},
-                                            readOnly = true
-                                        )
-                                    }
-                                }
-
-                                is IContent.Text -> {
-                                    item {
-                                        FieldForContent(
-                                            modifier = Modifier,
-                                            text = content.text,
-                                            onTextInput = {
-                                                createNoteViewModel.processCommand(
-                                                    Command.AddDescription(
-                                                        description = it,
-                                                        index = index
-                                                    )
-                                                )
-                                            }
-                                        )
-                                    }
-                                }
-                            }
+                        contentList = stateValue.content,
+                        onDeleteImageClick = {
+                            createNoteViewModel.processCommand(
+                                Command.DeleteImage(it)
+                            )
+                        },
+                        onTextInput = { string, i ->
+                            createNoteViewModel.processCommand(
+                                Command.AddDescription(
+                                    description = string,
+                                    index = i
+                                )
+                            )
                         }
-                    }
+                    )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     // Save button
                     Button(
@@ -214,17 +166,169 @@ fun CreateNote(
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(
+    onNavIconClick: () -> Unit,
+    onActionIconClick: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                modifier = Modifier.padding(start = 12.dp),
+                text = "Create note",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        },
+        navigationIcon = {
+            Icon(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .size(24.dp)
+                    .clickable { onNavIconClick() },
+                painter = painterResource(R.drawable.ic_angle_double_left),
+                contentDescription = "Go back",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        actions = {
+            Icon(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(24.dp)
+                    .clickable {
+                        onActionIconClick()
+                    },
+                painter = painterResource(R.drawable.ic_add_photo),
+                contentDescription = "Add photo from gallery",
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
+    )
+}
+
 
 @Composable
-fun FieldForContent(
+fun Content(
+    modifier: Modifier = Modifier,
+    contentList: List<IContent>,
+    onDeleteImageClick: (Int) -> Unit,
+    onTextInput: (String, Int) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        contentList.forEachIndexed { index, content ->
+            when (content) {
+                is IContent.Image -> {
+                        val flag =
+                            (index == 0) || (contentList[index - 1] is IContent.Text)
+                        contentList.takeIf { flag }
+                            ?.drop(index)
+                            ?.takeWhile {
+                                it is IContent.Image
+                            }
+                            ?.map {
+                                (it as IContent.Image).url
+                            }
+                            ?.also { images ->
+                                item(key = "${index}_${images.size}") {
+                                DisplayImageRow(
+                                    images = images,
+                                    onDeleteImageClick = {
+                                        onDeleteImageClick(index + it)
+                                    }
+                                )
+                            }
+                    }
+                }
+
+                is IContent.Text -> {
+                    item(key = index) {
+                        TextContent(
+                            modifier = Modifier,
+                            text = content.text,
+                            onTextInput = {
+                                onTextInput(it, index)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun ImageContent(
+    modifier: Modifier = Modifier,
+    image: String,
+    onDeleteImageClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp)),
+            model = image,
+            contentDescription = "Image from gallery",
+            contentScale = ContentScale.FillWidth
+        )
+
+        Icon(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .clickable{
+                    onDeleteImageClick()
+                },
+            painter = painterResource(R.drawable.ic_delete),
+            contentDescription = "Remove photo",
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
+
+
+@Composable
+fun DisplayImageRow(
+    modifier: Modifier = Modifier,
+    images: List<String>,
+    onDeleteImageClick: (Int) -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        images.forEachIndexed { index, value ->
+            ImageContent(
+                modifier = Modifier.weight(1f),
+                image = value,
+                onDeleteImageClick = {
+                    onDeleteImageClick(index)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun TextContent(
     modifier: Modifier = Modifier,
     text: String,
     onTextInput: (String) -> Unit,
     readOnly: Boolean = false,
 ) {
     OutlinedTextField(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         value = text,
         onValueChange = onTextInput,
@@ -243,6 +347,6 @@ fun FieldForContent(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface
         ),
-        minLines = 5
+        minLines = 4
     )
 }
