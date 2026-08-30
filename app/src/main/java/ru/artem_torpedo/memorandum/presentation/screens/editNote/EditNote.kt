@@ -7,18 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -33,7 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.artem_torpedo.memorandum.R
-import ru.artem_torpedo.memorandum.presentation.screens.noteCreation.Content
+import ru.artem_torpedo.memorandum.presentation.ui.theme.Content
+import ru.artem_torpedo.memorandum.presentation.ui.theme.NoteTitle
+import ru.artem_torpedo.memorandum.presentation.ui.theme.SaveButton
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,23 +116,12 @@ fun EditNote(
                     Spacer(Modifier.height(16.dp))
 
                     // Заголовок заметки
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        value = stateValue.note.title,
+                    NoteTitle(
+                        modifier = Modifier,
+                        text = stateValue.note.title,
                         onValueChange = {
                             editNoteViewModel.processCommand(Command.ChangeTitle(it))
-                        },
-                        placeholder = {
-                            Text(text = "Title", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        },
-                        textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                        )
+                        }
                     )
 
                     Spacer(Modifier.height(12.dp))
@@ -170,22 +155,13 @@ fun EditNote(
 
                     Spacer(Modifier.height(16.dp))
 
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
+                    SaveButton(
+                        modifier = Modifier,
                         enabled = stateValue.isEnabled,
                         onClick = {
                             editNoteViewModel.processCommand(Command.Save)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        Text(text = "Save", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    }
+                        }
+                    )
                     Spacer(Modifier.height(16.dp))
                 }
             }

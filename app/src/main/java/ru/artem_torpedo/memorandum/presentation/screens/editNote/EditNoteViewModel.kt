@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import ru.artem_torpedo.memorandum.domain.DeleteNoteUseCase
 import ru.artem_torpedo.memorandum.domain.EditNoteUseCase
 import ru.artem_torpedo.memorandum.domain.GetNoteUseCase
-import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.domain.IContent.Image
 import ru.artem_torpedo.memorandum.domain.IContent.Text
 import ru.artem_torpedo.memorandum.domain.Note
@@ -69,9 +68,13 @@ class EditNoteViewModel @AssistedInject constructor(
 
             is Command.DeleteImage -> _state.update {
                 if (it is EditNoteState.Edit) {
-                    val content = it.note.content.toMutableList()
-                    content.removeAt(command.index)
-                    val newNote = it.note.copy(content = content)
+                    val newContent = it.note.content.toMutableList()
+                    newContent.removeAt(command.index)
+                    val last = newContent.last()
+                    if (last is Text && last.text.isBlank() && newContent.size > 1 && newContent[newContent.lastIndex - 1] is Text) {
+                        newContent.removeAt(newContent.lastIndex)
+                    }
+                    val newNote = it.note.copy(content = newContent)
                     it.copy(note = newNote)
                 } else {
                     it
@@ -81,7 +84,7 @@ class EditNoteViewModel @AssistedInject constructor(
             is Command.AddImage -> _state.update {
                 if (it is EditNoteState.Edit) {
                     val newContent = it.note.content.toMutableList()
-                    newContent.dropLastWhile { last ->
+                        .dropLastWhile { last ->
                         last is Text && last.text.isBlank()
                     }.toMutableList().apply {
                         add(Image(url = command.uri.toString()))
