@@ -74,8 +74,8 @@ fun MainScreen(
         ) {
             item {
                 Title(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "All Notes"
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    text = "All Notes",
                 )
             }
 
@@ -193,7 +193,7 @@ fun SearchBar(
             Icon(
                 painter = painterResource(R.drawable.ic_search),
                 contentDescription = "Search",
-                tint = ElectricBlue
+                tint = MaterialTheme.colorScheme.primary
             )
         },
         colors = TextFieldDefaults.colors(
@@ -246,7 +246,6 @@ fun NoteCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-
         note.content.filterIsInstance<IContent.Text>()
             .joinToString("\n") {
                 it.text

@@ -1,5 +1,6 @@
 package ru.artem_torpedo.memorandum.presentation.screens.editNote
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 import ru.artem_torpedo.memorandum.domain.DeleteNoteUseCase
 import ru.artem_torpedo.memorandum.domain.EditNoteUseCase
 import ru.artem_torpedo.memorandum.domain.GetNoteUseCase
-import ru.artem_torpedo.memorandum.domain.IContent
+import ru.artem_torpedo.memorandum.domain.IContent.Image
+import ru.artem_torpedo.memorandum.domain.IContent.Text
 import ru.artem_torpedo.memorandum.domain.Note
 
 @HiltViewModel(assistedFactory = EditNoteViewModel.Factory::class)
@@ -51,11 +53,48 @@ class EditNoteViewModel @AssistedInject constructor(
                 previousState.copy(note = newNote)
             }
 
-            is Command.ChangeContent -> _state.update {
+            is Command.ChangeText -> _state.update {
                 val previousState = it as EditNoteState.Edit
-                val newContent = listOf(IContent.Text(command.content))
+                val newContent = previousState.note.content.mapIndexed { index, content ->
+                    if (command.index == index && content is Text) {
+                        Text(text = command.content)
+                    } else {
+                        content
+                    }
+                }
                 val newNote = previousState.note.copy(content = newContent)
                 previousState.copy(note = newNote)
+            }
+
+            is Command.DeleteImage -> _state.update {
+                if (it is EditNoteState.Edit) {
+                    val newContent = it.note.content.toMutableList()
+                    newContent.removeAt(command.index)
+                    val last = newContent.last()
+                    if (last is Text && last.text.isBlank() && newContent.size > 1 && newContent[newContent.lastIndex - 1] is Text) {
+                        newContent.removeAt(newContent.lastIndex)
+                    }
+                    val newNote = it.note.copy(content = newContent)
+                    it.copy(note = newNote)
+                } else {
+                    it
+                }
+            }
+
+            is Command.AddImage -> _state.update {
+                if (it is EditNoteState.Edit) {
+                    val newContent = it.note.content.toMutableList()
+                        .dropLastWhile { last ->
+                        last is Text && last.text.isBlank()
+                    }.toMutableList().apply {
+                        add(Image(url = command.uri.toString()))
+                        add(Text(text = ""))
+                    }
+                    val newNote = it.note.copy(content = newContent)
+                    it.copy(note = newNote)
+                } else {
+                    it
+                }
             }
 
             is Command.Back -> _state.update {
@@ -88,7 +127,11 @@ class EditNoteViewModel @AssistedInject constructor(
 sealed interface Command {
     data class ChangeTitle(val title: String) : Command
 
-    data class ChangeContent(val content: String) : Command
+    data class ChangeText(val index: Int, val content: String) : Command
+
+    data class DeleteImage(val index: Int) : Command
+
+    data class  AddImage(val uri: Uri) : Command
 
     object Save : Command
 
@@ -106,11 +149,11 @@ sealed interface EditNoteState {
         val isEnabled: Boolean
             get() {
                 return when {
-                    note.title.isBlank() -> false
-                    note.content.isEmpty() -> false
+                    note.title.isBlank() || note.content.isEmpty() -> false
                     note.content.any {
-                        it is IContent.Image || (it as IContent.Text).text.isNotBlank()
+                        it is Image || (it as Text).text.isNotBlank()
                     } -> true
+
                     else -> false
                 }
             }
