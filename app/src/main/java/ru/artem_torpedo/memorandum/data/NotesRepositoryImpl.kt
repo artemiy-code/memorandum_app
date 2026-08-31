@@ -11,6 +11,7 @@ import javax.inject.Singleton
 @Singleton
 class NotesRepositoryImpl @Inject constructor(
     private val dao: NotesDao,
+    private val imagesProcessor: ImagesProcess,
 ) : NotesRepository {
 
     override suspend fun addNote(
@@ -19,16 +20,23 @@ class NotesRepositoryImpl @Inject constructor(
         updatedAt: Long,
         isPinned: Boolean,
     ) {
-        val note = Note(0, title, content, updatedAt, isPinned).convertToDB()
+        val note = Note(0, title, content.processForStorage(), updatedAt, isPinned).convertToDB()
         dao.addOrEditNote(note)
     }
 
     override suspend fun deleteNote(noteId: Int) {
+        val content = getNote(noteId).content
+        content.deleteImagesFromStorage()
         dao.deleteNote(noteId)
     }
 
     override suspend fun editNote(note: Note) {
-        dao.addOrEditNote(note.convertToDB())
+        val oldContent = getNote(note.id).content.filterIsInstance<IContent.Image>()
+        val newContent = note.content.filterIsInstance<IContent.Image>()
+        (oldContent - newContent.toSet()).deleteImagesFromStorage()
+        val processedContent = note.content.processForStorage()
+        val processedNote = note.copy(content = processedContent)
+        dao.addOrEditNote(processedNote.convertToDB())
     }
 
     override fun getAllNote(): Flow<List<Note>> {
@@ -53,5 +61,30 @@ class NotesRepositoryImpl @Inject constructor(
 
     override suspend fun switchPinnedStatus(noteId: Int) {
         dao.switchPinnedStatus(noteId)
+    }
+
+    private suspend fun List<IContent>.processForStorage(): List<IContent> {
+        return this.map { contentItem ->
+            when (contentItem) {
+                is IContent.Image -> {
+                    if (imagesProcessor.isInternalFile(contentItem.url)) {
+                        contentItem
+                    } else {
+                        IContent.Image(imagesProcessor.internalStorageAdd(contentItem.url))
+                    }
+                }
+
+                is IContent.Text -> {
+                    contentItem
+                }
+            }
+        }
+    }
+
+    private suspend fun List<IContent>.deleteImagesFromStorage() {
+        this.forEach { content ->
+            if (content is IContent.Image)
+                imagesProcessor.internalStorageDelete(content.url)
+        }
     }
 }
