@@ -3,10 +3,12 @@ package ru.artem_torpedo.memorandum.presentation.screens.mainScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,15 +29,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import ru.artem_torpedo.memorandum.R
 import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.domain.Note
-import ru.artem_torpedo.memorandum.presentation.ui.theme.ElectricBlue
 import ru.artem_torpedo.memorandum.presentation.ui.theme.OtherNotesColors
 import ru.artem_torpedo.memorandum.presentation.ui.theme.PinnedNotesColors
 import ru.artem_torpedo.memorandum.presentation.utils.DateConverter
@@ -137,18 +140,38 @@ fun MainScreen(
 
                 // Не закрепленные заметки
                 stateValue.unPinnedNotes.forEachIndexed { index, note ->
-                    item(key = note.id) {
-                        NoteCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            note = note,
-                            color = OtherNotesColors[index % OtherNotesColors.size],
-                            onClick = onClick,
-                            onLongClick = {
-                                viewModel.processCommand(Commands.SwitchPinnedStatus(it.id))
-                            }
-                        )
+                    val image = note.content.firstOrNull {
+                        it is IContent.Image
+                    }
+                    if (image != null) {
+                        item(key = note.id) {
+                            NoteCardWithPhoto(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                note = note,
+                                imageURL = (image as IContent.Image).url,
+                                color = OtherNotesColors[index % OtherNotesColors.size],
+                                onClick = onClick,
+                                onLongClick = {
+                                    viewModel.processCommand(Commands.SwitchPinnedStatus(it.id))
+                                }
+                            )
+                        }
+                    } else {
+                        item(key = note.id) {
+                            NoteCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                note = note,
+                                color = OtherNotesColors[index % OtherNotesColors.size],
+                                onClick = onClick,
+                                onLongClick = {
+                                    viewModel.processCommand(Commands.SwitchPinnedStatus(it.id))
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -221,6 +244,80 @@ fun Subtitle(
 }
 
 @Composable
+fun NoteCardWithPhoto(
+    modifier: Modifier = Modifier,
+    note: Note,
+    imageURL: String,
+    color: Color,
+    onClick: (Note) -> Unit,
+    onLongClick: (Note) -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(color)
+            .combinedClickable(
+                onLongClick = { onLongClick(note) },
+                onClick = { onClick(note) },
+            )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .heightIn(max = 130.dp)
+                    .clip(RoundedCornerShape(14.dp)),
+                model = imageURL,
+                contentDescription = "Photo from gallery",
+                alpha = 0.8f,
+                contentScale = ContentScale.FillWidth
+            )
+            note.content.filterIsInstance<IContent.Text>().takeIf {
+                it.isNotEmpty() && it.first().text.isNotBlank()
+            }?.joinToString("\n") {
+                it.text
+            }?.also {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = it,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp),
+        )
+        {
+            Text(
+                text = note.title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(
+                text = DateConverter.convertDate(note.updatedAt),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.White.copy(alpha = 0.95f),
+            )
+        }
+
+    }
+}
+
+
+@Composable
 fun NoteCard(
     modifier: Modifier = Modifier,
     note: Note,
@@ -246,10 +343,15 @@ fun NoteCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        note.content.filterIsInstance<IContent.Text>()
+        note.content
+            .filterIsInstance<IContent.Text>()
             .joinToString("\n") {
                 it.text
-            }.also {
+            }
+            .takeIf {
+                it.isNotBlank()
+            }
+            ?.also {
                 Text(
                     text = it,
                     fontSize = 14.sp,
@@ -259,7 +361,6 @@ fun NoteCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
 
         Text(
             modifier = Modifier.align(Alignment.End),
