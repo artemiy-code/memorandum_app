@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +43,7 @@ fun NoteTitle(
         onValueChange = onValueChange,
         placeholder = {
             Text(
-                text = "Title",
+                text = stringResource(R.string.title),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
@@ -122,7 +123,7 @@ fun ImageContent(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp)),
             model = image,
-            contentDescription = "Image from gallery",
+            contentDescription = stringResource(R.string.photo_from_gallery),
             contentScale = ContentScale.FillWidth
         )
 
@@ -134,7 +135,7 @@ fun ImageContent(
                     onDeleteImageClick()
                 },
             painter = painterResource(R.drawable.ic_delete),
-            contentDescription = "Remove photo",
+            contentDescription = stringResource(R.string.remove_photo),
             tint = MaterialTheme.colorScheme.onPrimary
         )
     }
@@ -178,7 +179,7 @@ fun TextContent(
         readOnly = readOnly,
         placeholder = {
             Text(
-                text = "Description",
+                text = stringResource(R.string.description),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Light
             )
@@ -212,6 +213,6 @@ fun SaveButton(
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
-        Text(text = "Save", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(text = stringResource(R.string.save), fontSize = 18.sp, fontWeight = FontWeight.Bold)
     }
 }

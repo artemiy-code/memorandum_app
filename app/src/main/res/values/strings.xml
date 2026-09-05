@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Memorandum</string>
+    <string name="loading">LOADING…</string>
+    <string name="edit_note">Edit note</string>
+    <string name="all_notes">All Notes</string>
+    <string name="pinned">Pinned</string>
+    <string name="add_your_first_note">Add your first note⇩</string>
+    <string name="others">Others</string>
+    <string name="search_your_notes">Search your notes…</string>
+    <string name="create_note">Create note</string>
+    <string name="go_back">Go back</string>
+    <string name="add_photo_from_gallery">Add photo from gallery</string>
+    <string name="delete_note">Delete note</string>
+    <string name="add_a_note">Add a note</string>
+    <string name="search">Search</string>
+    <string name="photo_from_gallery">Photo from gallery</string>
+    <string name="title">Title</string>
+    <string name="remove_photo">Remove photo</string>
+    <string name="description">Description</string>
+    <string name="save">Save</string>
+    <string name="just_now">Just now</string>
+    <string name="m">%1$d m.</string>
+    <string name="h">%1$d h.</string>
+    <string name="days">%1$d days</string>
 </resources>

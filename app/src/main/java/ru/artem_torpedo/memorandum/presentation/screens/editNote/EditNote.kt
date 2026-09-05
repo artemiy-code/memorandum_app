@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +58,7 @@ fun EditNote(
                         title = {
                             Text(
                                 modifier = Modifier.padding(start = 12.dp),
-                                text = "Edit note",
+                                text = stringResource(R.string.edit_note),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary
@@ -72,7 +73,7 @@ fun EditNote(
                                         editNoteViewModel.processCommand(Command.Back)
                                     },
                                 painter = painterResource(R.drawable.ic_angle_double_left),
-                                contentDescription = "Go back",
+                                contentDescription = stringResource(R.string.go_back),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         },
@@ -85,7 +86,7 @@ fun EditNote(
                                         imagePicker.launch("image/*")
                                     },
                                 painter = painterResource(R.drawable.ic_add_photo),
-                                contentDescription = "Add photo from gallery",
+                                contentDescription = stringResource(R.string.add_photo_from_gallery),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
 
@@ -97,7 +98,7 @@ fun EditNote(
                                         editNoteViewModel.processCommand(Command.Delete)
                                     },
                                 painter = painterResource(R.drawable.ic_delete),
-                                contentDescription = "Delete note",
+                                contentDescription = stringResource(R.string.delete_note),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         },
@@ -176,7 +177,7 @@ fun EditNote(
         is EditNoteState.Initial -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center)
             {
-                Text(text = "LOADING...", fontSize = 40.sp)
+                Text(text = stringResource(R.string.loading), fontSize = 40.sp)
             }
         }
     }

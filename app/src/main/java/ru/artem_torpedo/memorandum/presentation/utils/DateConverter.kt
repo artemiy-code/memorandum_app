@@ -1,5 +1,8 @@
 package ru.artem_torpedo.memorandum.presentation.utils
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import ru.artem_torpedo.memorandum.R
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
@@ -15,13 +18,14 @@ object DateConverter {
         return formatter.format(System.currentTimeMillis())
     }
 
+    @Composable
     fun convertDate(timestamp: Long): String {
         val diff = System.currentTimeMillis() - timestamp
         return when {
-            diff < minute -> "Just now"
-            diff < hour -> "${TimeUnit.MILLISECONDS.toMinutes(diff)} m."
-            diff < day -> "${TimeUnit.MILLISECONDS.toHours(diff)} h."
-            diff < week -> "${TimeUnit.MILLISECONDS.toDays(diff)} days"
+            diff < minute -> stringResource(R.string.just_now)
+            diff < hour -> stringResource(R.string.m, TimeUnit.MILLISECONDS.toMinutes(diff))
+            diff < day -> stringResource(R.string.h, TimeUnit.MILLISECONDS.toHours(diff))
+            diff < week -> stringResource(R.string.days, TimeUnit.MILLISECONDS.toDays(diff))
             else -> formatter.format(timestamp)
         }
     }

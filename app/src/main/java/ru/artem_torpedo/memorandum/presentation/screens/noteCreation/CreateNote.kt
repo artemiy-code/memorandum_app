@@ -21,6 +21,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.artem_torpedo.memorandum.R
@@ -140,7 +141,7 @@ fun TopBar(
         title = {
             Text(
                 modifier = Modifier.padding(start = 12.dp),
-                text = "Create note",
+                text = stringResource(R.string.create_note),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.primary
@@ -153,7 +154,7 @@ fun TopBar(
                     .size(24.dp)
                     .clickable { onNavIconClick() },
                 painter = painterResource(R.drawable.ic_angle_double_left),
-                contentDescription = "Go back",
+                contentDescription = stringResource(R.string.go_back),
                 tint = MaterialTheme.colorScheme.primary
             )
         },
@@ -166,7 +167,7 @@ fun TopBar(
                         onActionIconClick()
                     },
                 painter = painterResource(R.drawable.ic_add_photo),
-                contentDescription = "Add photo from gallery",
+                contentDescription = stringResource(R.string.add_photo_from_gallery),
                 tint = MaterialTheme.colorScheme.secondary
             )
         },

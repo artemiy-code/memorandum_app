@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Меморандум</string>
+    <string name="loading">ЗАГРУЗКА…</string>
+    <string name="edit_note">Изменить заметку</string>
+    <string name="all_notes">Все заметки</string>
+    <string name="pinned">Закрепленные</string>
+    <string name="add_your_first_note">Добавьте первую заметку⇩</string>
+    <string name="others">Другое</string>
+    <string name="search_your_notes">Поиск заметок…</string>
+    <string name="create_note">Создать заметку</string>
+    <string name="go_back">Назад</string>
+    <string name="add_photo_from_gallery">Добавить фото из галереи</string>
+    <string name="delete_note">Удалить заметку</string>
+    <string name="add_a_note">Добавить заметку</string>
+    <string name="search">Поиск</string>
+    <string name="photo_from_gallery">Фото из галереи</string>
+    <string name="title">Заголовок</string>
+    <string name="remove_photo">Удалить фото</string>
+    <string name="description">Описание</string>
+    <string name="save">Сохранить</string>
+    <string name="just_now">Just now</string>
+    <string name="m">%1$d м.</string>
+    <string name="h">%1$d ч.</string>
+    <string name="days">%1$d дней</string>
+</resources>

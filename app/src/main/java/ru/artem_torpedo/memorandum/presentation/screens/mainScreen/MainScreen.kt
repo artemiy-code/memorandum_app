@@ -28,9 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,7 +65,7 @@ fun MainScreen(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_add_note),
-                    contentDescription = "Add a note"
+                    contentDescription = stringResource(R.string.add_a_note)
                 )
             }
         }
@@ -78,7 +80,7 @@ fun MainScreen(
             item {
                 Title(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    text = "All Notes",
+                    text = stringResource(R.string.all_notes),
                 )
             }
 
@@ -95,7 +97,7 @@ fun MainScreen(
                 item {
                     Subtitle(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        text = "Pinned"
+                        text = stringResource(R.string.pinned)
                     )
                 }
 
@@ -127,14 +129,14 @@ fun MainScreen(
                 item {
                     Title(
                         modifier = Modifier.padding(top = 240.dp, start = 24.dp),
-                        text = " Add your first note⇩"
+                        text = stringResource(R.string.add_your_first_note)
                     )
                 }
             } else {
                 item {
                     Subtitle(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        text = "Others"
+                        text = stringResource(R.string.others)
                     )
                 }
 
@@ -207,7 +209,7 @@ fun SearchBar(
         onValueChange = onTextInput,
         placeholder = {
             Text(
-                text = "Search your notes...",
+                text = stringResource(R.string.search_your_notes),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -215,7 +217,7 @@ fun SearchBar(
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.ic_search),
-                contentDescription = "Search",
+                contentDescription = stringResource(R.string.search),
                 tint = MaterialTheme.colorScheme.primary
             )
         },
@@ -262,14 +264,15 @@ fun NoteCardWithPhoto(
             )
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
         ) {
             AsyncImage(
                 modifier = Modifier
                     .heightIn(max = 130.dp)
                     .clip(RoundedCornerShape(14.dp)),
                 model = imageURL,
-                contentDescription = "Photo from gallery",
+                contentDescription = stringResource(R.string.photo_from_gallery),
                 alpha = 0.8f,
                 contentScale = ContentScale.FillWidth
             )
@@ -293,7 +296,7 @@ fun NoteCardWithPhoto(
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(16.dp),
+                .padding(16.dp)
         )
         {
             Text(
