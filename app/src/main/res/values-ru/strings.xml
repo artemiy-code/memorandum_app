@@ -22,5 +22,5 @@
     <string name="just_now">Just now</string>
     <string name="m">%1$d м.</string>
     <string name="h">%1$d ч.</string>
-    <string name="days">%1$d дней</string>
+    <string name="days">%1$d д.</string>
 </resources>

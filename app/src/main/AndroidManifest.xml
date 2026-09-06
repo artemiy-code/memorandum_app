@@ -15,7 +15,7 @@
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Memorandum">
+            android:theme="@style/Theme.Memorandum.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
