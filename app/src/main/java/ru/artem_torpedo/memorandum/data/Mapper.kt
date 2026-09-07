@@ -1,27 +1,61 @@
 package ru.artem_torpedo.memorandum.data
 
-import kotlinx.serialization.json.Json
 import ru.artem_torpedo.memorandum.domain.IContent
 import ru.artem_torpedo.memorandum.domain.Note
 
 fun Note.convertToDB(): NoteDbModel {
-    val contentToString = Json.encodeToString(content)
     return NoteDbModel(
         id = id,
         title = title,
-        content = contentToString,
         updatedAt = updatedAt,
         isPinned = isPinned
     )
 }
 
-fun NoteDbModel.convertToEntity(): Note {
-    val contentList = Json.decodeFromString<List<IContent>>(content)
+fun List<IContent>.convertToDB(noteId: Int): List<ContentItemDbModel> {
+    return mapIndexed { index, content ->
+        when (content) {
+            is IContent.Image -> {
+                ContentItemDbModel(
+                    noteId = noteId,
+                    contentType = ContentType.IMAGE,
+                    pieceOfContent = content.url,
+                    contentOrder = index
+                )
+            }
+
+            is IContent.Text -> {
+                ContentItemDbModel(
+                    noteId = noteId,
+                    contentType = ContentType.TEXT,
+                    pieceOfContent = content.text,
+                    contentOrder = index
+                )
+            }
+        }
+    }
+}
+
+fun List<ContentItemDbModel>.convertToDB(): List<IContent> {
+    return map { content ->
+        when (content.contentType) {
+            ContentType.TEXT -> {
+                IContent.Text(content.pieceOfContent)
+            }
+
+            ContentType.IMAGE -> {
+                IContent.Image(content.pieceOfContent)
+            }
+        }
+    }
+}
+
+fun FullNoteDbModel.convertToEntity(): Note {
     return Note(
-        id = id,
-        title = title,
-        content = contentList,
-        updatedAt = updatedAt,
-        isPinned = isPinned
+        id = note.id,
+        title = note.title,
+        content = content.convertToDB(),
+        updatedAt = note.updatedAt,
+        isPinned = note.isPinned
     )
 }

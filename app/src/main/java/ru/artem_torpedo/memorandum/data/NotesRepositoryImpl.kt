@@ -20,8 +20,12 @@ class NotesRepositoryImpl @Inject constructor(
         updatedAt: Long,
         isPinned: Boolean,
     ) {
-        val note = Note(0, title, content.processForStorage(), updatedAt, isPinned).convertToDB()
-        dao.addOrEditNote(note)
+        val note = NoteDbModel(0, title, updatedAt, isPinned)
+        val noteId = dao.addOrEditNote(note).toInt()
+
+        val processedContent = content.processForStorage()
+        val contentDb = processedContent.convertToDB(noteId)
+        dao.addOrEditContent(contentDb)
     }
 
     override suspend fun deleteNote(noteId: Int) {
@@ -31,18 +35,21 @@ class NotesRepositoryImpl @Inject constructor(
     }
 
     override suspend fun editNote(note: Note) {
+        dao.addOrEditNote(note.convertToDB())
+
         val oldContent = getNote(note.id).content.filterIsInstance<IContent.Image>()
         val newContent = note.content.filterIsInstance<IContent.Image>()
         (oldContent - newContent.toSet()).deleteImagesFromStorage()
         val processedContent = note.content.processForStorage()
-        val processedNote = note.copy(content = processedContent)
-        dao.addOrEditNote(processedNote.convertToDB())
+        dao.deleteContent(note.id)
+        val contentDb = processedContent.convertToDB(note.id)
+        dao.addOrEditContent(contentDb)
     }
 
     override fun getAllNote(): Flow<List<Note>> {
         return dao.getAllNotes().map {
-            it.map { noteDbModel ->
-                noteDbModel.convertToEntity()
+            it.map { fullNote ->
+                fullNote.convertToEntity()
             }
         }
     }
@@ -53,8 +60,8 @@ class NotesRepositoryImpl @Inject constructor(
 
     override fun searchNote(query: String): Flow<List<Note>> {
         return dao.filterNotes(query).map {
-            it.map { noteDbModel ->
-                noteDbModel.convertToEntity()
+            it.map { fullNote ->
+                fullNote.convertToEntity()
             }
         }
     }
