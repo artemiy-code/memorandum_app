@@ -21,11 +21,8 @@ class NotesRepositoryImpl @Inject constructor(
         isPinned: Boolean,
     ) {
         val note = NoteDbModel(0, title, updatedAt, isPinned)
-        val noteId = dao.addOrEditNote(note).toInt()
-
         val processedContent = content.processForStorage()
-        val contentDb = processedContent.convertToDB(noteId)
-        dao.addOrEditContent(contentDb)
+        dao.addFullNote(note, processedContent)
     }
 
     override suspend fun deleteNote(noteId: Int) {
@@ -35,15 +32,12 @@ class NotesRepositoryImpl @Inject constructor(
     }
 
     override suspend fun editNote(note: Note) {
-        dao.addOrEditNote(note.convertToDB())
-
         val oldContent = getNote(note.id).content.filterIsInstance<IContent.Image>()
         val newContent = note.content.filterIsInstance<IContent.Image>()
         (oldContent - newContent.toSet()).deleteImagesFromStorage()
         val processedContent = note.content.processForStorage()
-        dao.deleteContent(note.id)
-        val contentDb = processedContent.convertToDB(note.id)
-        dao.addOrEditContent(contentDb)
+
+        dao.editFullNote(note, processedContent)
     }
 
     override fun getAllNote(): Flow<List<Note>> {

@@ -120,7 +120,7 @@ fun ImageContent(
         modifier = modifier
     ) {
         AsyncImage(
-            modifier = Modifier
+            modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp)),
             model = image,
             contentDescription = stringResource(R.string.photo_from_gallery),

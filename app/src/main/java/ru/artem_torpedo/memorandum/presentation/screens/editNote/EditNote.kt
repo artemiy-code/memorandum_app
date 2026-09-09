@@ -61,7 +61,8 @@ fun EditNote(
                                 text = stringResource(R.string.edit_note),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 20.sp
                             )
                         },
                         navigationIcon = {

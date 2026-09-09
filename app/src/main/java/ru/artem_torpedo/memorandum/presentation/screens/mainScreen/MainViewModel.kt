@@ -21,9 +21,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val getAllNotesUseCase : GetAllNotesUseCase,
-    private val searchNoteUseCase : SearchNoteUseCase,
-    private val switchPinnedStatusUseCase : SwitchPinnedStatusUseCase,
+    private val getAllNotesUseCase: GetAllNotesUseCase,
+    private val searchNoteUseCase: SearchNoteUseCase,
+    private val switchPinnedStatusUseCase: SwitchPinnedStatusUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
@@ -45,7 +45,6 @@ class MainViewModel @Inject constructor(
 
                 _state.update {
                     it.copy(
-                        query = query.value,
                         pinnedNotes = pinnedNotes,
                         unPinnedNotes = otherNotes
                     )
@@ -55,15 +54,18 @@ class MainViewModel @Inject constructor(
     }
 
     fun processCommand(command: Commands) {
-        viewModelScope.launch {
-            when (command) {
-                is Commands.SearchNote -> {
-                    query.update {
-                        command.query
-                    }
+        when (command) {
+            is Commands.SearchNote -> {
+                _state.update {
+                    it.copy(query = command.query)
                 }
+                query.update {
+                    command.query
+                }
+            }
 
-                is Commands.SwitchPinnedStatus -> {
+            is Commands.SwitchPinnedStatus -> {
+                viewModelScope.launch {
                     switchPinnedStatusUseCase(command.noteId)
                 }
             }

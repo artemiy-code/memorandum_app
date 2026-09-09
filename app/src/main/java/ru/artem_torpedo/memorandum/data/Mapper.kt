@@ -36,7 +36,7 @@ fun List<IContent>.convertToDB(noteId: Int): List<ContentItemDbModel> {
     }
 }
 
-fun List<ContentItemDbModel>.convertToDB(): List<IContent> {
+fun List<ContentItemDbModel>.convertToEntity(): List<IContent> {
     return map { content ->
         when (content.contentType) {
             ContentType.TEXT -> {
@@ -54,7 +54,7 @@ fun FullNoteDbModel.convertToEntity(): Note {
     return Note(
         id = note.id,
         title = note.title,
-        content = content.convertToDB(),
+        content = content.convertToEntity(),
         updatedAt = note.updatedAt,
         isPinned = note.isPinned
     )
